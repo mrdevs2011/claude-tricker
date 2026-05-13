@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Claude AI — Account Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -17,14 +17,23 @@
     --text: #f0f0f0;
     --text2: #8b8e96;
     --text3: #555a63;
+
+    /* States */
     --accent: #4f8ef7;
-    --accent-dim: rgba(79,142,247,0.12);
+    --accent-dim: rgba(79,142,247,0.10);
+    --accent-border: rgba(79,142,247,0.25);
+
     --green: #34c77b;
-    --green-dim: rgba(52,199,123,0.12);
-    --amber: #f5a623;
-    --amber-dim: rgba(245,166,35,0.1);
+    --green-dim: rgba(52,199,123,0.10);
+    --green-border: rgba(52,199,123,0.25);
+
     --red: #f05252;
-    --red-dim: rgba(240,82,82,0.1);
+    --red-dim: rgba(240,82,82,0.10);
+    --red-border: rgba(240,82,82,0.25);
+
+    --amber: #f5a623;
+    --amber-dim: rgba(245,166,35,0.10);
+
     --radius: 10px;
     --radius-lg: 14px;
   }
@@ -34,11 +43,11 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    padding: 2rem 1rem;
+    padding: 2rem 1rem 3rem;
   }
 
   .container {
-    max-width: 820px;
+    max-width: 900px;
     margin: 0 auto;
     animation: fadeUp 0.4s ease both;
   }
@@ -46,6 +55,11 @@
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulseGreen {
+    0%,100% { box-shadow: 0 0 0 0 rgba(52,199,123,0); }
+    50%      { box-shadow: 0 0 0 6px rgba(52,199,123,0.12); }
   }
 
   /* Header */
@@ -57,25 +71,9 @@
     gap: 12px;
     flex-wrap: wrap;
   }
-
-  .header-left h1 {
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--text);
-    letter-spacing: -0.3px;
-  }
-
-  .header-left p {
-    font-size: 13px;
-    color: var(--text2);
-    margin-top: 4px;
-  }
-
-  .header-right {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
+  .header-left h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; }
+  .header-left p  { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  .header-right   { display: flex; gap: 8px; flex-wrap: wrap; }
 
   /* Buttons */
   button {
@@ -93,20 +91,19 @@
     align-items: center;
     gap: 6px;
   }
-  button:hover { background: var(--bg2); color: var(--text); border-color: var(--border2); }
+  button:hover  { background: var(--bg2); color: var(--text); }
   button:active { transform: scale(0.97); }
   button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
   button.primary:hover { background: #3a7de6; }
-  button.danger { background: var(--red-dim); color: var(--red); border-color: rgba(240,82,82,0.25); }
+  button.danger  { background: var(--red-dim); color: var(--red); border-color: var(--red-border); }
 
   /* Stats */
   .stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 1.5rem;
   }
-
   .stat-card {
     background: var(--bg2);
     border: 1px solid var(--border);
@@ -115,24 +112,38 @@
     animation: fadeUp 0.4s ease both;
   }
   .stat-card:nth-child(1) { animation-delay: 0.05s; }
-  .stat-card:nth-child(2) { animation-delay: 0.1s; }
+  .stat-card:nth-child(2) { animation-delay: 0.10s; }
   .stat-card:nth-child(3) { animation-delay: 0.15s; }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-  }
-
-  .stat-val {
-    font-size: 26px;
-    font-weight: 600;
-    color: var(--text);
-  }
+  .stat-card:nth-child(4) { animation-delay: 0.20s; }
+  .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .stat-val   { font-size: 24px; font-weight: 600; color: var(--text); }
   .stat-val.amber { color: var(--amber); }
   .stat-val.green { color: var(--green); }
+  .stat-val.red   { color: var(--red); }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text3);
+  }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .legend-dot.default { background: var(--text3); }
+  .legend-dot.used    { background: var(--accent); }
+  .legend-dot.active  { background: var(--green); }
+  .legend-dot.overdue { background: var(--red); }
 
   /* Table */
   .table-wrap {
@@ -141,239 +152,169 @@
     overflow: hidden;
     background: var(--bg2);
   }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-  }
-
-  thead tr {
-    background: var(--bg3);
-    border-bottom: 1px solid var(--border);
-  }
-
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  thead tr { background: var(--bg3); border-bottom: 1px solid var(--border); }
   th {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 10px 14px;
-    text-align: left;
+    font-size: 11px; font-weight: 500; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 10px 14px; text-align: left;
   }
-  th:first-child { width: 44px; text-align: center; }
-  th:nth-child(4) { width: 148px; }
-  th:last-child   { width: 70px; text-align: center; }
+  th:first-child  { width: 44px; text-align: center; }
+  th:nth-child(4) { width: 110px; }
+  th:nth-child(5) { width: 130px; }
+  th:last-child   { width: 80px; text-align: center; }
 
   tbody tr {
     border-top: 1px solid var(--border);
-    transition: background 0.12s;
+    transition: background 0.15s;
     animation: fadeUp 0.35s ease both;
   }
-  tbody tr:hover { background: rgba(255,255,255,0.025); }
-  tbody tr.used { background: rgba(79,142,247,0.06); }
+
+  /* Row states */
+  tbody tr.state-default { }
+  tbody tr.state-used    { background: rgba(79,142,247,0.05); }
+  tbody tr.state-active  { background: rgba(52,199,123,0.07); animation: pulseGreen 2.5s ease-in-out infinite; }
+  tbody tr.state-overdue { background: rgba(240,82,82,0.06); }
+
+  tbody tr:hover { filter: brightness(1.08); }
 
   td {
-    padding: 11px 14px;
-    font-size: 13px;
-    color: var(--text2);
-    vertical-align: middle;
-    word-break: break-word;
+    padding: 11px 14px; font-size: 13px; color: var(--text2);
+    vertical-align: middle; word-break: break-word;
   }
   td:first-child { text-align: center; }
   td:last-child  { text-align: center; }
 
-  .account-name {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 2px;
-  }
-  .account-note {
-    font-size: 11px;
-    color: var(--text3);
-    font-family: 'DM Mono', monospace;
-  }
+  .account-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .account-note { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
 
-  .email {
-    font-size: 12px;
-    font-family: 'DM Mono', monospace;
-    color: var(--text2);
-  }
+  .email { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text2); }
 
-  .time-cell {
-    font-size: 12px;
-    font-family: 'DM Mono', monospace;
-    color: var(--text3);
-  }
-  .time-cell.today { color: var(--green); }
+  .time-cell { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text3); }
+  .time-cell.today  { color: var(--green); }
 
-  /* Checkbox custom */
-  .cb-wrap {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    width: 20px;
-    height: 20px;
-  }
-
-  .cb-wrap input[type="checkbox"] {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    border: 1.5px solid var(--border2);
-    border-radius: 5px;
-    background: transparent;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+  /* Wake time cell */
+  .wake-wrap {
     display: flex;
     align-items: center;
-    justify-content: center;
-    position: relative;
-    flex-shrink: 0;
+    gap: 6px;
+  }
+  .wake-input {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 4px 8px;
+    width: 82px;
+    outline: none;
+    transition: border-color 0.15s;
+    cursor: pointer;
+  }
+  .wake-input:hover  { border-color: rgba(255,255,255,0.22); }
+  .wake-input:focus  { border-color: var(--accent); }
+  .wake-input.has-value.state-active  { border-color: var(--green); color: var(--green); }
+  .wake-input.has-value.state-overdue { border-color: var(--red);   color: var(--red); }
+  .wake-clear {
+    background: transparent; border: none; padding: 2px 4px;
+    color: var(--text3); font-size: 13px; cursor: pointer;
+    border-radius: 4px; line-height: 1;
+    transition: color 0.12s, background 0.12s;
+    display: flex; align-items: center;
+  }
+  .wake-clear:hover { color: var(--red); background: var(--red-dim); }
+  .wake-clear:active { transform: scale(0.9); }
+
+  /* Checkbox */
+  .cb-wrap {
+    display: inline-flex; align-items: center;
+    justify-content: center; cursor: pointer;
+    width: 20px; height: 20px;
+  }
+  .cb-wrap input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--border2);
+    border-radius: 5px; background: transparent;
+    cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    position: relative; flex-shrink: 0;
   }
   .cb-wrap input[type="checkbox"]:checked {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--accent); border-color: var(--accent);
   }
   .cb-wrap input[type="checkbox"]:checked::after {
     content: '';
-    position: absolute;
-    left: 4px;
-    top: 1.5px;
-    width: 5px;
-    height: 9px;
-    border: 2px solid #fff;
-    border-top: none;
-    border-left: none;
+    position: absolute; left: 4px; top: 1.5px;
+    width: 5px; height: 9px;
+    border: 2px solid #fff; border-top: none; border-left: none;
     transform: rotate(45deg);
   }
 
-  /* Status badge */
+  /* Badge */
   .badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 500;
-    padding: 3px 8px;
-    border-radius: 20px;
-    letter-spacing: 0.3px;
+    display: inline-block; font-size: 10px; font-weight: 500;
+    padding: 3px 8px; border-radius: 20px; letter-spacing: 0.3px;
   }
-  .badge.free   { background: var(--green-dim); color: var(--green); }
-  .badge.used   { background: var(--accent-dim); color: var(--accent); }
+  .badge.default { background: var(--bg3); color: var(--text3); border: 1px solid var(--border); }
+  .badge.used    { background: var(--accent-dim); color: var(--accent); }
+  .badge.active  { background: var(--green-dim);  color: var(--green); }
+  .badge.overdue { background: var(--red-dim);    color: var(--red); }
 
   /* Icon btn */
   .icon-btn {
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 7px;
-    padding: 5px;
-    color: var(--text3);
-    font-size: 15px;
-    cursor: pointer;
+    background: transparent; border: 1px solid transparent;
+    border-radius: 7px; padding: 5px; color: var(--text3);
+    font-size: 15px; cursor: pointer;
     transition: background 0.12s, color 0.12s, border-color 0.12s;
-    display: inline-flex;
-    align-items: center;
+    display: inline-flex; align-items: center;
   }
   .icon-btn:hover { background: var(--bg3); color: var(--text2); border-color: var(--border2); }
-  .icon-btn svg { display: block; }
 
   /* Modal */
   .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(4px);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    z-index: 100; align-items: center; justify-content: center; padding: 1rem;
   }
   .modal-overlay.open { display: flex; }
-
   .modal {
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    width: 100%;
-    max-width: 400px;
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: var(--radius-lg); padding: 1.5rem;
+    width: 100%; max-width: 400px;
     animation: fadeUp 0.2s ease both;
   }
-  .modal h3 {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-  .modal p {
-    font-size: 12px;
-    color: var(--text3);
-    margin-bottom: 1rem;
-    font-family: 'DM Mono', monospace;
-  }
-  .modal input[type="text"],
+  .modal h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .modal p  { font-size: 12px; color: var(--text3); margin-bottom: 1rem; font-family: 'DM Mono', monospace; }
   .modal textarea {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    padding: 9px 12px;
-    outline: none;
-    transition: border-color 0.15s;
-    resize: none;
+    width: 100%; background: var(--bg3);
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; padding: 9px 12px; outline: none;
+    transition: border-color 0.15s; resize: none; height: 80px;
   }
-  .modal input:focus, .modal textarea:focus { border-color: var(--accent); }
-  .modal textarea { height: 80px; }
-  .modal .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 12px;
-  }
+  .modal textarea:focus { border-color: var(--accent); }
+  .modal .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
 
   /* Toast */
   #toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    padding: 10px 16px;
-    font-size: 13px;
-    color: var(--text);
-    z-index: 999;
-    opacity: 0;
-    transform: translateY(8px);
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: var(--radius); padding: 10px 16px;
+    font-size: 13px; color: var(--text); z-index: 999;
+    opacity: 0; transform: translateY(8px);
     transition: opacity 0.2s, transform 0.2s;
     pointer-events: none;
   }
   #toast.show { opacity: 1; transform: translateY(0); }
 
-  /* Divider */
-  .divider {
-    height: 1px;
-    background: var(--border);
-    margin: 1.5rem 0;
-  }
+  .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
 
-  /* Footer note */
   .footer-note {
-    text-align: center;
-    font-size: 11px;
-    color: var(--text3);
-    margin-top: 1.5rem;
+    text-align: center; font-size: 11px; color: var(--text3); margin-top: 1.5rem;
   }
 
-  /* Responsive */
-  @media (max-width: 600px) {
+  @media (max-width: 650px) {
     .stats { grid-template-columns: 1fr 1fr; }
     th:nth-child(4), td:nth-child(4) { display: none; }
   }
@@ -412,9 +353,21 @@
       <div class="stat-val amber" id="s-used">0</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Hali mavjud</div>
-      <div class="stat-val green" id="s-free">10</div>
+      <div class="stat-label">Tayyor (vaqti keldi)</div>
+      <div class="stat-val green" id="s-active">0</div>
     </div>
+    <div class="stat-card">
+      <div class="stat-label">Hali kutmoqda</div>
+      <div class="stat-val red" id="s-waiting">0</div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot default"></div>Tanlanmagan (oddiy)</div>
+    <div class="legend-item"><div class="legend-dot used"></div>Ishlatilgan (ko'k)</div>
+    <div class="legend-item"><div class="legend-dot active"></div>Vaqti keldi — tayyor (yashil)</div>
+    <div class="legend-item"><div class="legend-dot overdue"></div>Ishlatilgan, vaqt o'tmagan (qizil)</div>
   </div>
 
   <!-- Table -->
@@ -426,6 +379,7 @@
           <th>Ism / Izoh</th>
           <th>Email</th>
           <th>Oxirgi vaqt</th>
+          <th>Uyg'onish vaqti</th>
           <th>Holat</th>
         </tr>
       </thead>
@@ -436,8 +390,8 @@
   <div class="divider"></div>
 
   <div class="footer-note">
-    Ma'lumotlar brauzer xotirasiga saqlanadi — sahifani yopsangiz ham qoladi.
-    Har kuni "Tozalash" tugmasini bosib yangi kun boshlang.
+    Ma'lumotlar brauzer xotirasiga saqlanadi. Uyg'onish vaqti — accountni qachon ishlatsa bo'lishini belgilaydi.
+    Vaqt kelgach account avtomatik yashil bo'ladi.
   </div>
 </div>
 
@@ -473,8 +427,9 @@ const ACCOUNTS = [
 
 let state = {};
 let editingId = null;
+let tickInterval = null;
 
-const KEY = 'claude_tracker_v2';
+const KEY = 'claude_tracker_v3';
 
 function loadState() {
   try {
@@ -482,7 +437,8 @@ function loadState() {
     if (raw) state = JSON.parse(raw);
   } catch(e) {}
   ACCOUNTS.forEach(a => {
-    if (!state[a.id]) state[a.id] = { used: false, ts: null, note: '' };
+    if (!state[a.id]) state[a.id] = { used: false, ts: null, note: '', wakeTime: '' };
+    if (!('wakeTime' in state[a.id])) state[a.id].wakeTime = '';
   });
 }
 
@@ -501,10 +457,165 @@ function toggle(id) {
 
 function clearAll() {
   if (!confirm('Barcha checkboxlar tozalansinmi?')) return;
-  ACCOUNTS.forEach(a => { state[a.id].used = false; state[a.id].ts = null; });
+  ACCOUNTS.forEach(a => {
+    state[a.id].used = false;
+    state[a.id].ts = null;
+  });
   render();
   saveData();
   toast('✅ Yangi kun boshlandi!');
+}
+
+function setWakeTime(id, value) {
+  state[id].wakeTime = value;
+  // no full re-render, just update classes on existing row
+  updateRowState(id);
+  saveData();
+}
+
+function clearWakeTime(id) {
+  state[id].wakeTime = '';
+  updateRowState(id);
+  saveData();
+}
+
+// Get state for a single account
+// States: 'default' | 'used' | 'active' | 'overdue'
+// - default: not used, no wake time or wake time not yet set
+// - used: checkbox ticked, no wake time (pure blue)
+// - active: checkbox ticked + wake time set + wake time has passed → GREEN (tayyor)
+// - overdue: checkbox ticked + wake time set + wake time NOT yet passed → RED (hali kutish)
+// Special: not ticked + wake time set + past → show as active green (ready to use)
+function getRowState(id) {
+  const s = state[id];
+  const now = new Date();
+
+  if (s.wakeTime) {
+    const wakeDate = parseTodayTime(s.wakeTime);
+    const wakePassed = wakeDate && now >= wakeDate;
+    if (wakePassed) {
+      // Wake time has passed — account is ready/active (green)
+      return 'active';
+    } else {
+      // Wake time not yet passed — still waiting (red)
+      return 'overdue';
+    }
+  }
+
+  if (s.used) return 'used';
+  return 'default';
+}
+
+function parseTodayTime(timeStr) {
+  if (!timeStr) return null;
+  const parts = timeStr.split(':');
+  if (parts.length < 2) return null;
+  const h = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  if (isNaN(h) || isNaN(m)) return null;
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+  return d;
+}
+
+function updateRowState(id) {
+  const rowState = getRowState(id);
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  if (!row) return;
+  row.className = `state-${rowState}`;
+
+  const badge = row.querySelector('.badge');
+  if (badge) {
+    badge.className = `badge ${rowState}`;
+    badge.textContent = badgeLabel(rowState);
+  }
+
+  const wakeInput = row.querySelector('.wake-input');
+  if (wakeInput) {
+    const s = state[id];
+    wakeInput.className = `wake-input${s.wakeTime ? ' has-value' : ''} state-${rowState}`;
+  }
+
+  updateStats();
+}
+
+function badgeLabel(st) {
+  if (st === 'used')    return 'Ishlatildi';
+  if (st === 'active')  return 'Tayyor ✓';
+  if (st === 'overdue') return 'Kutmoqda…';
+  return 'Erkin';
+}
+
+function formatTime(ts) {
+  if (!ts) return { text: '—', today: false };
+  const d = new Date(ts);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mi = String(d.getMinutes()).padStart(2,'0');
+  if (isToday) return { text: 'Bugun ' + hh + ':' + mi, today: true };
+  return { text: dd + '/' + mm + ' ' + hh + ':' + mi, today: false };
+}
+
+function updateStats() {
+  let used = 0, active = 0, waiting = 0;
+  ACCOUNTS.forEach(a => {
+    const st = getRowState(a.id);
+    if (st === 'used')    used++;
+    if (st === 'active')  active++;
+    if (st === 'overdue') waiting++;
+  });
+  document.getElementById('s-used').textContent    = used;
+  document.getElementById('s-active').textContent  = active;
+  document.getElementById('s-waiting').textContent = waiting;
+}
+
+function render() {
+  const tbody = document.getElementById('tbody');
+
+  tbody.innerHTML = ACCOUNTS.map((a, i) => {
+    const s = state[a.id];
+    const rowState = getRowState(a.id);
+    const t = formatTime(s.ts);
+    const delay = (i * 0.03).toFixed(2);
+    return `<tr class="state-${rowState}" data-id="${a.id}" style="animation-delay:${delay}s">
+      <td>
+        <label class="cb-wrap" title="Foydalanildi deb belgilash">
+          <input type="checkbox" ${s.used ? 'checked' : ''} onchange="toggle(${a.id})" />
+        </label>
+      </td>
+      <td>
+        <div class="account-name">${a.name}</div>
+        ${s.note ? `<div class="account-note">${escHtml(s.note)}</div>` : ''}
+      </td>
+      <td><div class="email">${a.email}</div></td>
+      <td><div class="time-cell ${t.today ? 'today' : ''}">${t.text}</div></td>
+      <td>
+        <div class="wake-wrap">
+          <input
+            type="time"
+            class="wake-input${s.wakeTime ? ' has-value' : ''} state-${rowState}"
+            value="${s.wakeTime || ''}"
+            title="Uyg'onish vaqtini kiriting"
+            onchange="setWakeTime(${a.id}, this.value)"
+          />
+          ${s.wakeTime ? `<button class="wake-clear" onclick="clearWakeTime(${a.id})" title="Vaqtni o'chirish">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>` : ''}
+        </div>
+      </td>
+      <td>
+        <span class="badge ${rowState}">${badgeLabel(rowState)}</span>
+        <button class="icon-btn" onclick="openModal(${a.id})" title="Izoh qo'shish" style="margin-left:4px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  updateStats();
 }
 
 function openModal(id) {
@@ -531,51 +642,8 @@ function saveNote() {
   }
 }
 
-function formatTime(ts) {
-  if (!ts) return { text: '—', today: false };
-  const d = new Date(ts);
-  const now = new Date();
-  const isToday = d.toDateString() === now.toDateString();
-  const dd = String(d.getDate()).padStart(2,'0');
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const hh = String(d.getHours()).padStart(2,'0');
-  const mi = String(d.getMinutes()).padStart(2,'0');
-  if (isToday) return { text: 'Bugun ' + hh + ':' + mi, today: true };
-  return { text: dd + '/' + mm + ' ' + hh + ':' + mi, today: false };
-}
-
-function render() {
-  const tbody = document.getElementById('tbody');
-  let usedCount = 0;
-
-  tbody.innerHTML = ACCOUNTS.map((a, i) => {
-    const s = state[a.id];
-    if (s.used) usedCount++;
-    const t = formatTime(s.ts);
-    const delay = (i * 0.03).toFixed(2);
-    return `<tr class="${s.used ? 'used' : ''}" style="animation-delay:${delay}s">
-      <td>
-        <label class="cb-wrap" title="Foydalanildi deb belgilash">
-          <input type="checkbox" ${s.used ? 'checked' : ''} onchange="toggle(${a.id})" />
-        </label>
-      </td>
-      <td>
-        <div class="account-name">${a.name}</div>
-        ${s.note ? `<div class="account-note">${s.note}</div>` : ''}
-      </td>
-      <td><div class="email">${a.email}</div></td>
-      <td><div class="time-cell ${t.today ? 'today' : ''}">${t.text}</div></td>
-      <td>
-        <span class="badge ${s.used ? 'used' : 'free'}">${s.used ? 'Ishlatildi' : 'Erkin'}</span>
-        <button class="icon-btn" onclick="openModal(${a.id})" title="Izoh qo'shish" style="margin-left:4px">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-      </td>
-    </tr>`;
-  }).join('');
-
-  document.getElementById('s-used').textContent = usedCount;
-  document.getElementById('s-free').textContent = ACCOUNTS.length - usedCount;
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function toast(msg) {
@@ -587,10 +655,20 @@ function toast(msg) {
 
 function updateDate() {
   const d = new Date();
-  const days = ['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'];
+  const days   = ['Yakshanba','Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba'];
   const months = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
   document.getElementById('current-date').textContent =
     days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+// Tick every 30s to recheck wake times without full re-render
+function startTick() {
+  tickInterval = setInterval(() => {
+    ACCOUNTS.forEach(a => {
+      if (state[a.id].wakeTime) updateRowState(a.id);
+    });
+    updateStats();
+  }, 30000);
 }
 
 document.addEventListener('keydown', e => {
@@ -605,6 +683,7 @@ document.getElementById('modal').addEventListener('click', e => {
 loadState();
 render();
 updateDate();
+startTick();
 </script>
 </body>
 </html>
