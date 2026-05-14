@@ -161,7 +161,7 @@
   }
   th:first-child  { width: 44px; text-align: center; }
   th:nth-child(4) { width: 110px; }
-  th:nth-child(5) { width: 130px; }
+  th:nth-child(5) { width: 160px; }
   th:last-child   { width: 80px; text-align: center; }
 
   tbody tr {
@@ -197,25 +197,32 @@
   .wake-wrap {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
+    flex-wrap: wrap;
   }
-  .wake-input {
+  .wake-input-date,
+  .wake-input-time {
     font-family: 'DM Mono', monospace;
-    font-size: 12px;
+    font-size: 11px;
     background: var(--bg3);
     border: 1px solid var(--border2);
     border-radius: 6px;
     color: var(--text);
-    padding: 4px 8px;
-    width: 82px;
+    padding: 4px 6px;
     outline: none;
     transition: border-color 0.15s;
     cursor: pointer;
   }
-  .wake-input:hover  { border-color: rgba(255,255,255,0.22); }
-  .wake-input:focus  { border-color: var(--accent); }
-  .wake-input.has-value.state-active  { border-color: var(--green); color: var(--green); }
-  .wake-input.has-value.state-overdue { border-color: var(--red);   color: var(--red); }
+  .wake-input-date { width: 70px; }
+  .wake-input-time { width: 60px; }
+  .wake-input-date:hover,
+  .wake-input-time:hover  { border-color: rgba(255,255,255,0.22); }
+  .wake-input-date:focus,
+  .wake-input-time:focus  { border-color: var(--accent); }
+  .wake-input-date.has-value.state-active,
+  .wake-input-time.has-value.state-active  { border-color: var(--green); color: var(--green); }
+  .wake-input-date.has-value.state-overdue,
+  .wake-input-time.has-value.state-overdue { border-color: var(--red);   color: var(--red); }
   .wake-clear {
     background: transparent; border: none; padding: 2px 4px;
     color: var(--text3); font-size: 13px; cursor: pointer;
@@ -391,7 +398,7 @@
 
   <div class="footer-note">
     Ma'lumotlar brauzer xotirasiga saqlanadi. Uyg'onish vaqti — accountni qachon ishlatsa bo'lishini belgilaydi.
-    Vaqt kelgach account avtomatik yashil bo'ladi.
+    Vaqt kelgach account avtomatik yashil bo'ladi. Endi kun va soatni birga kiriting.
   </div>
 </div>
 
@@ -429,7 +436,7 @@ let state = {};
 let editingId = null;
 let tickInterval = null;
 
-const KEY = 'claude_tracker_v3';
+const KEY = 'claude_tracker_v4';
 
 function loadState() {
   try {
@@ -437,7 +444,8 @@ function loadState() {
     if (raw) state = JSON.parse(raw);
   } catch(e) {}
   ACCOUNTS.forEach(a => {
-    if (!state[a.id]) state[a.id] = { used: false, ts: null, note: '', wakeTime: '' };
+    if (!state[a.id]) state[a.id] = { used: false, ts: null, note: '', wakeDate: '', wakeTime: '' };
+    if (!('wakeDate' in state[a.id])) state[a.id].wakeDate = '';
     if (!('wakeTime' in state[a.id])) state[a.id].wakeTime = '';
   });
 }
@@ -466,39 +474,37 @@ function clearAll() {
   toast('✅ Yangi kun boshlandi!');
 }
 
-function setWakeTime(id, value) {
-  state[id].wakeTime = value;
-  // no full re-render, just update classes on existing row
+function setWakeDate(id, value) {
+  state[id].wakeDate = value;
   updateRowState(id);
   saveData();
 }
 
-function clearWakeTime(id) {
+function setWakeTime(id, value) {
+  state[id].wakeTime = value;
+  updateRowState(id);
+  saveData();
+}
+
+function clearWakeDateTime(id) {
+  state[id].wakeDate = '';
   state[id].wakeTime = '';
   updateRowState(id);
   saveData();
 }
 
-// Get state for a single account
-// States: 'default' | 'used' | 'active' | 'overdue'
-// - default: not used, no wake time or wake time not yet set
-// - used: checkbox ticked, no wake time (pure blue)
-// - active: checkbox ticked + wake time set + wake time has passed → GREEN (tayyor)
-// - overdue: checkbox ticked + wake time set + wake time NOT yet passed → RED (hali kutish)
-// Special: not ticked + wake time set + past → show as active green (ready to use)
 function getRowState(id) {
   const s = state[id];
   const now = new Date();
 
-  if (s.wakeTime) {
-    const wakeDate = parseTodayTime(s.wakeTime);
-    const wakePassed = wakeDate && now >= wakeDate;
-    if (wakePassed) {
-      // Wake time has passed — account is ready/active (green)
-      return 'active';
-    } else {
-      // Wake time not yet passed — still waiting (red)
-      return 'overdue';
+  if (s.wakeDate && s.wakeTime) {
+    const wakeDateTime = parseWakeDateTime(s.wakeDate, s.wakeTime);
+    if (wakeDateTime) {
+      if (now >= wakeDateTime) {
+        return 'active';
+      } else {
+        return 'overdue';
+      }
     }
   }
 
@@ -506,16 +512,15 @@ function getRowState(id) {
   return 'default';
 }
 
-function parseTodayTime(timeStr) {
-  if (!timeStr) return null;
+function parseWakeDateTime(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return null;
   const parts = timeStr.split(':');
   if (parts.length < 2) return null;
   const h = parseInt(parts[0], 10);
   const m = parseInt(parts[1], 10);
   if (isNaN(h) || isNaN(m)) return null;
-  const d = new Date();
-  d.setHours(h, m, 0, 0);
-  return d;
+  const d = new Date(dateStr + 'T' + timeStr + ':00');
+  return isNaN(d.getTime()) ? null : d;
 }
 
 function updateRowState(id) {
@@ -530,10 +535,14 @@ function updateRowState(id) {
     badge.textContent = badgeLabel(rowState);
   }
 
-  const wakeInput = row.querySelector('.wake-input');
-  if (wakeInput) {
-    const s = state[id];
-    wakeInput.className = `wake-input${s.wakeTime ? ' has-value' : ''} state-${rowState}`;
+  const dateInput = row.querySelector('.wake-input-date');
+  const timeInput = row.querySelector('.wake-input-time');
+  const s = state[id];
+  if (dateInput) {
+    dateInput.className = `wake-input-date${s.wakeDate ? ' has-value' : ''} state-${rowState}`;
+  }
+  if (timeInput) {
+    timeInput.className = `wake-input-time${s.wakeTime ? ' has-value' : ''} state-${rowState}`;
   }
 
   updateStats();
@@ -580,6 +589,7 @@ function render() {
     const rowState = getRowState(a.id);
     const t = formatTime(s.ts);
     const delay = (i * 0.03).toFixed(2);
+    const hasWake = s.wakeDate || s.wakeTime;
     return `<tr class="state-${rowState}" data-id="${a.id}" style="animation-delay:${delay}s">
       <td>
         <label class="cb-wrap" title="Foydalanildi deb belgilash">
@@ -595,13 +605,20 @@ function render() {
       <td>
         <div class="wake-wrap">
           <input
+            type="date"
+            class="wake-input-date${s.wakeDate ? ' has-value' : ''} state-${rowState}"
+            value="${s.wakeDate || ''}"
+            title="Kunni tanlang"
+            onchange="setWakeDate(${a.id}, this.value)"
+          />
+          <input
             type="time"
-            class="wake-input${s.wakeTime ? ' has-value' : ''} state-${rowState}"
+            class="wake-input-time${s.wakeTime ? ' has-value' : ''} state-${rowState}"
             value="${s.wakeTime || ''}"
-            title="Uyg'onish vaqtini kiriting"
+            title="Vaqtni tanlang"
             onchange="setWakeTime(${a.id}, this.value)"
           />
-          ${s.wakeTime ? `<button class="wake-clear" onclick="clearWakeTime(${a.id})" title="Vaqtni o'chirish">
+          ${hasWake ? `<button class="wake-clear" onclick="clearWakeDateTime(${a.id})" title="Vaqtni o'chirish">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>` : ''}
         </div>
@@ -661,11 +678,10 @@ function updateDate() {
     days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
 }
 
-// Tick every 30s to recheck wake times without full re-render
 function startTick() {
   tickInterval = setInterval(() => {
     ACCOUNTS.forEach(a => {
-      if (state[a.id].wakeTime) updateRowState(a.id);
+      if (state[a.id].wakeDate || state[a.id].wakeTime) updateRowState(a.id);
     });
     updateStats();
   }, 30000);
