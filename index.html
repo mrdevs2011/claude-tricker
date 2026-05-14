@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Claude AI — Account Tracker</title>
+<title>Claude AI — Pro Account Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -18,7 +18,6 @@
     --text2: #8b8e96;
     --text3: #555a63;
 
-    /* States */
     --accent: #4f8ef7;
     --accent-dim: rgba(79,142,247,0.10);
     --accent-border: rgba(79,142,247,0.25);
@@ -47,7 +46,7 @@
   }
 
   .container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
     animation: fadeUp 0.4s ease both;
   }
@@ -62,12 +61,51 @@
     50%      { box-shadow: 0 0 0 6px rgba(52,199,123,0.12); }
   }
 
+  /* Connection Status */
+  .connection-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+  .connection-status.online {
+    background: var(--green-dim);
+    color: var(--green);
+    border: 1px solid var(--green-border);
+  }
+  .connection-status.offline {
+    background: var(--red-dim);
+    color: var(--red);
+    border: 1px solid var(--red-border);
+  }
+  .connection-status.connecting {
+    background: var(--amber-dim);
+    color: var(--amber);
+    border: 1px solid rgba(245,166,35,0.25);
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .online .status-dot { background: var(--green); }
+  .offline .status-dot { background: var(--red); }
+  .connecting .status-dot { background: var(--amber); animation: pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
   /* Header */
   .header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 1.75rem;
+    margin-bottom: 1.5rem;
     gap: 12px;
     flex-wrap: wrap;
   }
@@ -75,7 +113,6 @@
   .header-left p  { font-size: 13px; color: var(--text2); margin-top: 4px; }
   .header-right   { display: flex; gap: 8px; flex-wrap: wrap; }
 
-  /* Buttons */
   button {
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
@@ -91,11 +128,13 @@
     align-items: center;
     gap: 6px;
   }
-  button:hover  { background: var(--bg2); color: var(--text); }
-  button:active { transform: scale(0.97); }
+  button:hover:not(:disabled)  { background: var(--bg2); color: var(--text); }
+  button:active:not(:disabled) { transform: scale(0.97); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
   button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  button.primary:hover { background: #3a7de6; }
+  button.primary:hover:not(:disabled) { background: #3a7de6; }
   button.danger  { background: var(--red-dim); color: var(--red); border-color: var(--red-border); }
+  button.danger:hover:not(:disabled) { background: var(--red); color: #fff; }
 
   /* Stats */
   .stats {
@@ -161,8 +200,8 @@
   }
   th:first-child  { width: 44px; text-align: center; }
   th:nth-child(4) { width: 110px; }
-  th:nth-child(5) { width: 160px; }
-  th:last-child   { width: 80px; text-align: center; }
+  th:nth-child(5) { width: 180px; }
+  th:last-child   { width: 90px; text-align: center; }
 
   tbody tr {
     border-top: 1px solid var(--border);
@@ -170,7 +209,6 @@
     animation: fadeUp 0.35s ease both;
   }
 
-  /* Row states */
   tbody tr.state-default { }
   tbody tr.state-used    { background: rgba(79,142,247,0.05); }
   tbody tr.state-active  { background: rgba(52,199,123,0.07); animation: pulseGreen 2.5s ease-in-out infinite; }
@@ -193,7 +231,6 @@
   .time-cell { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text3); }
   .time-cell.today  { color: var(--green); }
 
-  /* Wake time cell */
   .wake-wrap {
     display: flex;
     align-items: center;
@@ -213,8 +250,8 @@
     transition: border-color 0.15s;
     cursor: pointer;
   }
-  .wake-input-date { width: 70px; }
-  .wake-input-time { width: 60px; }
+  .wake-input-date { width: 72px; }
+  .wake-input-time { width: 62px; }
   .wake-input-date:hover,
   .wake-input-time:hover  { border-color: rgba(255,255,255,0.22); }
   .wake-input-date:focus,
@@ -233,7 +270,6 @@
   .wake-clear:hover { color: var(--red); background: var(--red-dim); }
   .wake-clear:active { transform: scale(0.9); }
 
-  /* Checkbox */
   .cb-wrap {
     display: inline-flex; align-items: center;
     justify-content: center; cursor: pointer;
@@ -258,7 +294,6 @@
     transform: rotate(45deg);
   }
 
-  /* Badge */
   .badge {
     display: inline-block; font-size: 10px; font-weight: 500;
     padding: 3px 8px; border-radius: 20px; letter-spacing: 0.3px;
@@ -268,7 +303,6 @@
   .badge.active  { background: var(--green-dim);  color: var(--green); }
   .badge.overdue { background: var(--red-dim);    color: var(--red); }
 
-  /* Icon btn */
   .icon-btn {
     background: transparent; border: 1px solid transparent;
     border-radius: 7px; padding: 5px; color: var(--text3);
@@ -278,7 +312,6 @@
   }
   .icon-btn:hover { background: var(--bg3); color: var(--text2); border-color: var(--border2); }
 
-  /* Modal */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
@@ -303,7 +336,6 @@
   .modal textarea:focus { border-color: var(--accent); }
   .modal .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
 
-  /* Toast */
   #toast {
     position: fixed; bottom: 24px; right: 24px;
     background: var(--bg2); border: 1px solid var(--border2);
@@ -321,6 +353,28 @@
     text-align: center; font-size: 11px; color: var(--text3); margin-top: 1.5rem;
   }
 
+  .loading-overlay {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .loading-overlay.hidden { display: none; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
   @media (max-width: 650px) {
     .stats { grid-template-columns: 1fr 1fr; }
     th:nth-child(4), td:nth-child(4) { display: none; }
@@ -329,27 +383,35 @@
 </head>
 <body>
 
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div style="color: var(--text2); font-size: 14px;">Firebase ulanishi...</div>
+</div>
+
 <div class="container">
 
-  <!-- Header -->
+  <div class="connection-status connecting" id="connection-status">
+    <div class="status-dot"></div>
+    <span id="connection-text">Ulanish kutilmoqda...</span>
+  </div>
+
   <div class="header">
     <div class="header-left">
       <h1>Claude AI — Account Tracker</h1>
       <p id="current-date">Yuklanmoqda...</p>
     </div>
     <div class="header-right">
+      <button id="sync-btn" class="primary" onclick="forceSync()" disabled>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.29"/></svg>
+        Sinxronlash
+      </button>
       <button class="danger" onclick="clearAll()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.29"/></svg>
         Tozalash
       </button>
-      <button class="primary" onclick="saveData()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Saqlash
-      </button>
     </div>
   </div>
 
-  <!-- Stats -->
   <div class="stats">
     <div class="stat-card">
       <div class="stat-label">Jami accountlar</div>
@@ -369,15 +431,13 @@
     </div>
   </div>
 
-  <!-- Legend -->
   <div class="legend">
     <div class="legend-item"><div class="legend-dot default"></div>Tanlanmagan (oddiy)</div>
     <div class="legend-item"><div class="legend-dot used"></div>Ishlatilgan (ko'k)</div>
     <div class="legend-item"><div class="legend-dot active"></div>Vaqti keldi — tayyor (yashil)</div>
-    <div class="legend-item"><div class="legend-dot overdue"></div>Ishlatilgan, vaqt o'tmagan (qizil)</div>
+    <div class="legend-item"><div class="legend-dot overdue"></div>Kutish holatida (qizil)</div>
   </div>
 
-  <!-- Table -->
   <div class="table-wrap">
     <table>
       <thead>
@@ -386,7 +446,7 @@
           <th>Ism / Izoh</th>
           <th>Email</th>
           <th>Oxirgi vaqt</th>
-          <th>Uyg'onish vaqti</th>
+          <th>Rejalashtirilgan vaqt</th>
           <th>Holat</th>
         </tr>
       </thead>
@@ -397,12 +457,10 @@
   <div class="divider"></div>
 
   <div class="footer-note">
-    Ma'lumotlar brauzer xotirasiga saqlanadi. Uyg'onish vaqti — accountni qachon ishlatsa bo'lishini belgilaydi.
-    Vaqt kelgach account avtomatik yashil bo'ladi. Endi kun va soatni birga kiriting.
+     Firebase real-time sinxronizatsiya. Barcha o'zgarishlar avtomatik saqlanadi va barcha qurilmalarda aks etadi.
   </div>
 </div>
 
-<!-- Modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <h3 id="modal-name">Izoh qo'shish</h3>
@@ -415,10 +473,26 @@
   </div>
 </div>
 
-<!-- Toast -->
 <div id="toast"></div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, get, set, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPqZHuWOX_5abNDazg0SiySsI2i20H5dE",
+  authDomain: "oandx-6cca4.firebaseapp.com",
+  databaseURL: "https://oandx-6cca4-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "oandx-6cca4",
+  storageBucket: "oandx-6cca4.firebasestorage.app",
+  messagingSenderId: "190969903155",
+  appId: "1:190969903155:web:f12da2d7b24a190a984b46",
+  measurementId: "G-EJLMVR51QM"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 const ACCOUNTS = [
   { id:1,  name:"Muhammadrasul Qosimov", email:"muhammad11rasul2011@gmail.com" },
   { id:2,  name:"MR developer",          email:"mrdevs2011@gmail.com" },
@@ -435,62 +509,285 @@ const ACCOUNTS = [
 let state = {};
 let editingId = null;
 let tickInterval = null;
+let isOnline = false;
+let isInitialized = false;
+let pendingChanges = new Set();
 
-const KEY = 'claude_tracker_v4';
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) state = JSON.parse(raw);
-  } catch(e) {}
+function getDefaultState() {
+  const s = {};
   ACCOUNTS.forEach(a => {
-    if (!state[a.id]) state[a.id] = { used: false, ts: null, note: '', wakeDate: '', wakeTime: '' };
-    if (!('wakeDate' in state[a.id])) state[a.id].wakeDate = '';
-    if (!('wakeTime' in state[a.id])) state[a.id].wakeTime = '';
+    s[a.id] = { used: false, ts: null, note: '', wakeDate: '', wakeTime: '' };
+  });
+  return s;
+}
+
+function setConnectionStatus(status, text) {
+  isOnline = status === 'online';
+  const el = document.getElementById('connection-status');
+  el.className = 'connection-status ' + status;
+  document.getElementById('connection-text').textContent = text;
+  document.getElementById('sync-btn').disabled = !isOnline;
+}
+
+async function initFirebase() {
+  try {
+    setConnectionStatus('connecting', 'Firebase ga ulanmoqda...');
+    
+    const connectedRef = ref(db, '.info/connected');
+    onValue(connectedRef, async (snap) => {
+      if (snap.val() === true) {
+        setConnectionStatus('online', ' Firebase bilan bog\'langan — Real-time sinxronizatsiya faol');
+        if (!isInitialized) {
+          await loadFromFirebase();
+          isInitialized = true;
+          document.getElementById('loading').classList.add('hidden');
+          setupRealtimeSync();
+        }
+        if (pendingChanges.size > 0) {
+          await syncPendingChanges();
+        }
+      } else {
+        setConnectionStatus('offline', ' Firebase bilan aloqa yo\'q — Offline rejim');
+        document.getElementById('loading').classList.add('hidden');
+      }
+    });
+
+    setTimeout(() => {
+      if (!isInitialized) {
+        loadFromLocalStorage();
+        isInitialized = true;
+        document.getElementById('loading').classList.add('hidden');
+        setConnectionStatus('offline', ' Firebase ulanib bo\'lmadi — Local ma\'lumotlar');
+      }
+    }, 5000);
+
+  } catch (error) {
+    console.error('Firebase init error:', error);
+    loadFromLocalStorage();
+    isInitialized = true;
+    document.getElementById('loading').classList.add('hidden');
+    setConnectionStatus('offline', ' Firebase xatosi — Local rejim');
+  }
+}
+
+async function loadFromFirebase() {
+  try {
+    const snapshot = await get(ref(db, 'tracker_data/accounts'));
+    if (snapshot.exists()) {
+      const firebaseData = snapshot.val();
+      state = getDefaultState();
+      
+      ACCOUNTS.forEach(a => {
+        if (firebaseData && firebaseData[a.id]) {
+          state[a.id] = {
+            used: firebaseData[a.id].used || false,
+            ts: firebaseData[a.id].ts || null,
+            note: firebaseData[a.id].note || '',
+            wakeDate: firebaseData[a.id].wakeDate || '',
+            wakeTime: firebaseData[a.id].wakeTime || ''
+          };
+        }
+      });
+      
+      saveToLocalStorage();
+      render();
+      toast(' Firebase dan ma\'lumotlar yuklandi');
+    } else {
+      loadFromLocalStorage();
+      await saveToFirebase();
+    }
+  } catch (error) {
+    console.error('Load error:', error);
+    loadFromLocalStorage();
+    toast(' Firebase yuklash xatosi, local ma\'lumotlar');
+  }
+}
+
+function setupRealtimeSync() {
+  const accountsRef = ref(db, 'tracker_data/accounts');
+  onValue(accountsRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const firebaseData = snapshot.val();
+      let hasChanges = false;
+      
+      ACCOUNTS.forEach(a => {
+        if (firebaseData && firebaseData[a.id]) {
+          const fb = firebaseData[a.id];
+          const local = state[a.id];
+          
+          if (fb.used !== local.used || 
+              fb.ts !== local.ts || 
+              fb.note !== local.note || 
+              fb.wakeDate !== local.wakeDate || 
+              fb.wakeTime !== local.wakeTime) {
+            state[a.id] = {
+              used: fb.used || false,
+              ts: fb.ts || null,
+              note: fb.note || '',
+              wakeDate: fb.wakeDate || '',
+              wakeTime: fb.wakeTime || ''
+            };
+            hasChanges = true;
+          }
+        }
+      });
+      
+      if (hasChanges) {
+        render();
+        saveToLocalStorage();
+        toast(' Firebase dan yangilandi');
+      }
+    }
   });
 }
 
-function saveData() {
-  localStorage.setItem(KEY, JSON.stringify(state));
-  toast('💾 Saqlandi!');
+async function saveToFirebase() {
+  if (!isOnline) {
+    pendingChanges.add('accounts');
+    return;
+  }
+  
+  try {
+    const data = {};
+    ACCOUNTS.forEach(a => {
+      data[a.id] = state[a.id];
+    });
+    
+    await set(ref(db, 'tracker_data/accounts'), data);
+    pendingChanges.delete('accounts');
+  } catch (error) {
+    console.error('Save error:', error);
+    pendingChanges.add('accounts');
+    toast(' Saqlashda xatolik');
+  }
 }
 
-function toggle(id) {
+async function syncPendingChanges() {
+  if (pendingChanges.size > 0) {
+    await saveToFirebase();
+  }
+}
+
+function loadFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem('claude_tracker_pro_v1');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      state = getDefaultState();
+      
+      ACCOUNTS.forEach(a => {
+        if (parsed && parsed[a.id]) {
+          state[a.id] = {
+            used: parsed[a.id].used || false,
+            ts: parsed[a.id].ts || null,
+            note: parsed[a.id].note || '',
+            wakeDate: parsed[a.id].wakeDate || '',
+            wakeTime: parsed[a.id].wakeTime || ''
+          };
+        }
+      });
+    } else {
+      state = getDefaultState();
+    }
+  } catch(e) {
+    state = getDefaultState();
+  }
+}
+
+function saveToLocalStorage() {
+  try {
+    const data = {};
+    ACCOUNTS.forEach(a => {
+      data[a.id] = state[a.id];
+    });
+    localStorage.setItem('claude_tracker_pro_v1', JSON.stringify(data));
+  } catch(e) {
+    console.error('Local storage save error:', e);
+  }
+}
+
+async function forceSync() {
+  if (!isOnline) {
+    toast(' Internet yo\'q');
+    return;
+  }
+  await saveToFirebase();
+  await loadFromFirebase();
+  toast(' Sinxronizatsiya yakunlandi');
+}
+
+async function toggle(id) {
   const s = state[id];
   s.used = !s.used;
   s.ts = s.used ? Date.now() : null;
-  render();
-  saveData();
+  
+  saveToLocalStorage();
+  updateRowState(id);
+  updateStats();
+  
+  if (isOnline) {
+    await saveToFirebase();
+  } else {
+    pendingChanges.add('accounts');
+    toast('⚡ Offline — Internet qaytganda saqlanadi');
+  }
 }
 
-function clearAll() {
+async function clearAll() {
   if (!confirm('Barcha checkboxlar tozalansinmi?')) return;
+  
   ACCOUNTS.forEach(a => {
     state[a.id].used = false;
     state[a.id].ts = null;
   });
+  
+  saveToLocalStorage();
   render();
-  saveData();
-  toast('✅ Yangi kun boshlandi!');
+  
+  if (isOnline) {
+    await saveToFirebase();
+    toast(' Barchasi tozalandi va Firebase da yangilandi');
+  } else {
+    pendingChanges.add('accounts');
+    toast(' Tozalandi — Internet qaytganda Firebase yangilanadi');
+  }
 }
 
-function setWakeDate(id, value) {
+async function setWakeDate(id, value) {
   state[id].wakeDate = value;
   updateRowState(id);
-  saveData();
+  saveToLocalStorage();
+  
+  if (isOnline) {
+    await saveToFirebase();
+  } else {
+    pendingChanges.add('accounts');
+  }
 }
 
-function setWakeTime(id, value) {
+async function setWakeTime(id, value) {
   state[id].wakeTime = value;
   updateRowState(id);
-  saveData();
+  saveToLocalStorage();
+  
+  if (isOnline) {
+    await saveToFirebase();
+  } else {
+    pendingChanges.add('accounts');
+  }
 }
 
-function clearWakeDateTime(id) {
+async function clearWakeDateTime(id) {
   state[id].wakeDate = '';
   state[id].wakeTime = '';
   updateRowState(id);
-  saveData();
+  saveToLocalStorage();
+  
+  if (isOnline) {
+    await saveToFirebase();
+  } else {
+    pendingChanges.add('accounts');
+  }
 }
 
 function getRowState(id) {
@@ -593,7 +890,7 @@ function render() {
     return `<tr class="state-${rowState}" data-id="${a.id}" style="animation-delay:${delay}s">
       <td>
         <label class="cb-wrap" title="Foydalanildi deb belgilash">
-          <input type="checkbox" ${s.used ? 'checked' : ''} onchange="toggle(${a.id})" />
+          <input type="checkbox" ${s.used ? 'checked' : ''} onchange="window.toggleAccount(${a.id})" />
         </label>
       </td>
       <td>
@@ -609,23 +906,23 @@ function render() {
             class="wake-input-date${s.wakeDate ? ' has-value' : ''} state-${rowState}"
             value="${s.wakeDate || ''}"
             title="Kunni tanlang"
-            onchange="setWakeDate(${a.id}, this.value)"
+            onchange="window.setWakeDateAccount(${a.id}, this.value)"
           />
           <input
             type="time"
             class="wake-input-time${s.wakeTime ? ' has-value' : ''} state-${rowState}"
             value="${s.wakeTime || ''}"
             title="Vaqtni tanlang"
-            onchange="setWakeTime(${a.id}, this.value)"
+            onchange="window.setWakeTimeAccount(${a.id}, this.value)"
           />
-          ${hasWake ? `<button class="wake-clear" onclick="clearWakeDateTime(${a.id})" title="Vaqtni o'chirish">
+          ${hasWake ? `<button class="wake-clear" onclick="window.clearWakeDateTimeAccount(${a.id})" title="Vaqtni o'chirish">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>` : ''}
         </div>
       </td>
       <td>
         <span class="badge ${rowState}">${badgeLabel(rowState)}</span>
-        <button class="icon-btn" onclick="openModal(${a.id})" title="Izoh qo'shish" style="margin-left:4px">
+        <button class="icon-btn" onclick="window.openModalAccount(${a.id})" title="Izoh qo'shish" style="margin-left:4px">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
       </td>
@@ -634,6 +931,12 @@ function render() {
 
   updateStats();
 }
+
+window.toggleAccount = toggle;
+window.setWakeDateAccount = setWakeDate;
+window.setWakeTimeAccount = setWakeTime;
+window.clearWakeDateTimeAccount = clearWakeDateTime;
+window.openModalAccount = openModal;
 
 function openModal(id) {
   editingId = id;
@@ -645,17 +948,25 @@ function openModal(id) {
   setTimeout(() => document.getElementById('modal-input').focus(), 50);
 }
 
+window.closeModal = closeModal;
 function closeModal() {
   document.getElementById('modal').classList.remove('open');
   editingId = null;
 }
 
-function saveNote() {
+window.saveNote = saveNote;
+async function saveNote() {
   if (editingId) {
     state[editingId].note = document.getElementById('modal-input').value.trim();
-    saveData();
+    saveToLocalStorage();
     render();
     closeModal();
+    
+    if (isOnline) {
+      await saveToFirebase();
+    } else {
+      pendingChanges.add('accounts');
+    }
   }
 }
 
@@ -663,6 +974,7 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+window.showToast = toast;
 function toast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -696,10 +1008,14 @@ document.getElementById('modal').addEventListener('click', e => {
   if (e.target === document.getElementById('modal')) closeModal();
 });
 
-loadState();
+window.clearAll = clearAll;
+window.forceSync = forceSync;
+
+loadFromLocalStorage();
 render();
 updateDate();
 startTick();
+initFirebase();
 </script>
 </body>
 </html>
